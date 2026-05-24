@@ -16,6 +16,16 @@ description: >
 
 End-to-end workflow for generating rich IPTC metadata for a folder of JPEGs and renaming them.
 
+## Intake Sequence (FIRST step of the pipeline)
+
+For any new photos being considered for addition to a commercial-photography site, this skill is **step 1 of 3**:
+
+1. **Photo-Metadata-Helper** (this skill) — generate titles, descriptions, keywords, geo, and embed subject names
+2. **property-release-review** — audit depicted objects (buildings, artwork, branded venues, trademarks)
+3. **model-release-review** — audit depicted persons (identifiability, children, workers at workplace)
+
+Do not skip steps or change the order. Property review goes before model review because property concerns are usually dispositive of the sale decision regardless of model release status.
+
 ## Prerequisites
 
 Check that `exiftool` is installed before starting:
@@ -130,6 +140,36 @@ tag_and_rename() {
   mv "$OLD_FILE" "${OLD_FILE%/*}/${NEW_TITLE// /-}.jpg"
 }
 ```
+
+## Step 4.5 — Embed Subject Names (PersonInImage)
+
+If any image contains an identifiable person, embed the subject's full name into the photo's metadata. This is the IPTC Extension standard for naming people in an image; downstream tools, model-release audits, and image asset managers read it.
+
+Use the IPTC4xmpExt PersonInImage tag — written as `XMP-iptcExt:PersonInImage` in exiftool — plus an IPTC keyword for searchability:
+
+```bash
+exiftool -overwrite_original -P \
+  -XMP-iptcExt:PersonInImage="Subject Full Name" \
+  -IPTC:Keywords+="Subject Full Name" \
+  /path/to/photo.jpg
+```
+
+**Critical rules:**
+- Use the subject's full legal name (matches their model release on file).
+- One PersonInImage per subject. For group shots, run the command once per name — exiftool stacks the values.
+- `-P` preserves file modification time. `-overwrite_original` prevents `.jpg_original` backups.
+- `IPTC:Keywords+=` (note the `+=`) appends; bare `=` would overwrite existing keywords.
+- Embed BOTH on the source original (in your archive dir) AND the published/web copy. Otherwise the next pipeline rebuild loses the name from the published copy.
+
+**When to embed:** every time a person is identifiable. Skip macros, architecture-only frames, distant unidentifiable figures, and silhouettes.
+
+**Verify:**
+
+```bash
+exiftool -G -s -PersonInImage -Keywords /path/to/photo.jpg
+```
+
+Output should show `[XMP] PersonInImage : <Name>` and `<Name>` listed in `[IPTC] Keywords`.
 
 ## Step 5 — Verify
 

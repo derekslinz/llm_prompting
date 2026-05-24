@@ -22,6 +22,18 @@ Output location: a scratch dir scoped to the active audit (e.g. `<workdir>/downs
 
 The gate exists because description-only judgments (carry-over notes, captions, IPTC metadata, prior-session classifications) lie. Pixels don't.
 
+## Intake Sequence (Step 2 of 3)
+
+For new-photo intake, this skill is **step 2 of 3** in the pipeline:
+
+1. **Photo-Metadata-Helper** — metadata, naming, subject-name embed
+2. **property-release-review** (this skill) — depicted-object audit
+3. **model-release-review** — depicted-person audit
+
+This skill runs before model-release-review because property/trademark concerns are usually dispositive of the sale decision regardless of model release status.
+
+For audit-only passes on an already-published catalog, this skill can be invoked standalone.
+
 ## The Question
 
 For each non-exempt catalog entry: **is there anything in the depicted scene (building, interior, sculpture, mural, trademarked livery, signage, vehicle, named venue) that requires a property/trademark/copyright release before commercial sale?**

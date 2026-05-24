@@ -22,6 +22,18 @@ Output location: a scratch dir scoped to the active audit (e.g. `<workdir>/downs
 
 This rule exists because description-only judgments (carry-over notes from prior sessions, captions, IPTC metadata) lie. Pixels don't. The gate has demonstrably caught description-only HARD-FLAGs that the actual frame falsified — back-turned subjects mislabeled as frontal, glass-distorted faces mislabeled as identifiable.
 
+## Intake Sequence (Step 3 of 3)
+
+For new-photo intake, this skill is **step 3 of 3** in the pipeline:
+
+1. **Photo-Metadata-Helper** — metadata, naming, subject-name embed
+2. **property-release-review** — depicted-object audit
+3. **model-release-review** (this skill) — depicted-person audit
+
+If property review flagged a photo as Bucket 1 (remove entirely), skip model review for that photo — the property concern is already dispositive.
+
+For audit-only passes on an already-published catalog, this skill can be invoked standalone.
+
 ## The Question
 
 For each non-exempt catalog entry: **does the image require a signed model release before commercial sale?**
