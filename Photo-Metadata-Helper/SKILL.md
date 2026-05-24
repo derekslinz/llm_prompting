@@ -1,5 +1,5 @@
 ---
-name: photo-metadata-tagger
+name: photo-metadata-helper
 description: >
   Workflow for processing JPEG photos: view each image, generate a descriptive title (5–9 words),
   60–90 word description, and 8–12 keywords; reverse-geocode any embedded GPS coordinates via
@@ -28,7 +28,16 @@ If missing: `brew install exiftool` (macOS) or `apt install libimage-exiftool-pe
 
 ## Step 1 — View All Photos
 
-Read each image file using the Read tool so you can see its contents visually. Work in parallel batches of 6–8 at a time to stay efficient. For each photo, mentally note:
+Before reading any image, downscale it to a maximum of 1024 pixels on the long edge:
+
+```bash
+# Requires ImageMagick — check first: which magick || which convert
+magick "$FILE" -resize "1024x1024>" "/tmp/preview_$(basename "$FILE")"
+```
+
+**If the resize command fails** (ImageMagick not installed, unsupported format, permission error, etc.), stop immediately and ask the user how to proceed — do not fall back to reading the original full-sized file. Use `AskUserQuestion` with the specific error and options such as installing ImageMagick, skipping the affected file, or aborting the batch.
+
+Read the downscaled file from `/tmp/` using the Read tool, not the original. This keeps vision payloads small and avoids read failures on large RAW or high-res files. Work in parallel batches of 6–8 at a time. For each photo, mentally note:
 
 - **Subject**: What is the main subject? (person, species, object, scene)
 - **Context**: Indoor/outdoor, setting clues, event type
@@ -135,12 +144,13 @@ ls /path/to/dir/ | grep "_original" | wc -l   # should be 0
 exiftool -IPTC:ObjectName -IPTC:Caption-Abstract -IPTC:Keywords /path/to/file.jpg
 ```
 
-Confirm the title, description word count, and keyword list all look correct.
+Confirm the title, description word count, and keyword list all look correct. Clean up `/tmp/preview_*` files after verification.
 
 ## Common Pitfalls
 
 | Pitfall | Fix |
 |---|---|
+| Reading full-res originals directly | Downscale to ≤1024px long edge first with `magick`; read the `/tmp/preview_*` copy |
 | `.jpg_original` backup files created | Add `-overwrite_original` to every exiftool call |
 | New keywords appended to old ones | Include `-IPTC:Keywords=` (blank) before setting new keywords |
 | Misidentified subject (crozier vs caterpillar, etc.) | Review ambiguous shots carefully before writing — when uncertain, describe what you see literally |
